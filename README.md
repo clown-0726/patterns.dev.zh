@@ -2,23 +2,35 @@
 
 《patterns.dev》的中文翻译。
 
+![](./pic_bed/cover.svg)
+
 ## 简介
+
+Patterns.dev 是一本关于设计模式和组件模式的免费书籍，用于使用原生 JavaScript 和 React 构建强大的 web 应用程序。
+
+## Patterns.dev 是如何工作的
 
 xxx
 
 ## 目录
 
-#### 1. 设计模式
+###### 设计模式
 
-###### 1.1 简介
+#### 1.1 [简介](./articles/1_1_introduction.md)
 
 ​    *设计模式简介*
 
-###### 1.2 单例模式
+#### 1.2 [单例模式](./articles/1_2_singleton_pattern.md)
 
 ​    *在整个应用程序中共享一个全局实例*
 
+###### 渲染模式
 
+#### 2.x
+
+###### 性能模式
+
+#### 3.x
 
 ## 问题相关
 
