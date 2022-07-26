@@ -203,6 +203,174 @@ export default function TextBox() {
 
 #### 钩子函数（Hooks）
 
+我们可以创建一个钩子函数（hook）来为组件提供上下文（context）。我们可以使用一个钩子函数（hook）来返回我们需要的上下文（context），而不必在每个组件中都导入 `useContext` 和 `Context`。
+
+```javascript
+function useThemeContext() {
+  const theme = useContext(ThemeContext);
+  return theme;
+}
+```
+
+为了确保它是一个有效的主题，如果 `useContext`(ThemeContext) 返回一个错误值，我们就抛出一个错误。
+
+```javascript
+function useThemeContext() {
+  const theme = useContext(ThemeContext);
+  if (!theme) {
+    throw new Error("useThemeContext must be used within ThemeProvider");
+  }
+  return theme;
+}
+```
+
+我们可以创建一个用于包装组件的高阶组件（HOC）来为其提供值，而不是直接使用 `ThemeContext.Provider` 来进行包装。这样，我们可以将上下文逻辑从渲染组件中分离出来，从而提高 provider 的可重用性。
+
+```javascript
+function ThemeProvider({children}) {
+  const [theme, setTheme] = useState("dark");
+
+  function toggleTheme() {
+    setTheme(theme === "light" ? "dark" : "light");
+  }
+
+  const providerValue = {
+    theme: themes[theme],
+    toggleTheme
+  };
+
+  return (
+    <ThemeContext.Provider value={providerValue}>
+      {children}
+    </ThemeContext.Provider>
+  );
+}
+
+export default function App() {
+  return (
+    <div className={`App theme-${theme}`}>
+      <ThemeProvider>
+        <Toggle />
+        <List />
+      </ThemeProvider>
+    </div>
+  );
+}
+```
+
+每个需要访问 `ThemeContext` 的组件现在都可以轻松的使用 `useThemeContext` 钩子函数了。
+
+```javascript
+export default function TextBox() {
+  const theme = useThemeContext();
+
+  return <li style={theme.theme}>...</li>;
+}
+```
+
+通过为不同的上下文创建钩子函数（hook），可以很容易将 provider 的逻辑与数据渲染组件分离开来。
+
+------
+
+#### 实例学习
+
+一些库提供了内置的 provider，我们可以在消费组件中使用这些值。一个很好的例子是样式化组件（styled-components）。
+
+> 理解这个例子不需要有样式化组件（styled-components）的经验。
+
+styled-components 库为我们提供了 `ThemeProvider`。每个样式化组件都可以访问该提供者的值！我们可以使用提供给我们的上下文 API，而不用自己创建上下文 API！
+
+让我们使用相同的 `List` 示例，将组件包装在从 styled-component 库导入的 `ThemeProvider` 中。
+
+```javascript
+import { ThemeProvider } from "styled-components";
+
+export default function App() {
+  const [theme, setTheme] = useState("dark");
+
+  function toggleTheme() {
+    setTheme(theme === "light" ? "dark" : "light");
+  }
+
+  return (
+    <div className={`App theme-${theme}`}>
+      <ThemeProvider theme={themes[theme]}>
+        <>
+          <Toggle toggleTheme={toggleTheme} />
+          <List />
+        </>
+      </ThemeProvider>
+    </div>
+  );
+}
+```
+
+我们将写一个 `styled.li` 组件，而不是将内联样式通过 prop 传递给 `ListItem` 组件。由于它是一个样式化的组件，我们可以直接访问主题的值！
+
+```javascript
+import styled from "styled-components";
+
+export default function ListItem() {
+  return (
+    <Li>
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+      tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
+      veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
+      commodo consequat.
+    </Li>
+  );
+}
+
+const Li = styled.li`
+  ${({ theme }) => `
+     background-color: ${theme.backgroundColor};
+     color: ${theme.color};
+  `}
+`;
+```
+
+太棒了，我们现在可以使用 `ThemeProvider` 轻松地将样式应用到我们所有的样式组件中了！
+
+
+
+> ------
+>
+> > 打开 https://codesandbox.io/embed/divine-platform-gbuls 查看示例代码
+>
+> ------
+
+
+
+------
+
+#### 优点
+
+提供者模式或 Context API 可以将数据传递给很多组件，而无需手动将其传递给每层组件。
+
+它降低了重构代码时意外引入错误的风险。在这之前，如果我们以后想重命名一个 prop 属性，我们必须在使用该 prop 属性的整个应用程序中重新命名。
+
+我们不再需要处理 prop-drilling，这可能被视为一种反模式。以前，应用程序的数据流可能很难理解，因为某些 prop 属性的值的来源并不总是很清楚。使用提供者模式，我们不再需要向不关心这些数据的组件传递不必要的 props 属性。
+
+使用提供者模式可以轻松地保持某种全局状态，因为我们可以让组件直接访问这种全局状态。
+
+#### 缺点
+
+在某些情况下，过度使用提供者模式可能会导致性能问题。每次状态更改时，使用上下文（context）的所有组件都会重新渲染。
+
+让我们来看一个例子。我们有一个简单的计数器，每次单击按钮组件中的“增量”按钮时，该计数器的值都会增加。我们在重置组件中还有一个重置按钮，可以将计数重置回 0。
+
+但是，当单击“增量”按钮时，可以看到重新渲染的不仅仅是计数。重置组件中的日期也会重新渲染！
+
+重置组件也重新渲染，因为它使用了 useCountContext。在较小的应用程序中，这并没有什么影响。在大型应用程序中，将频繁更新的值传递给许多组件可能会对性能产生负面影响。
+
+为了确保组件不会使用包含可能不相关值的提供者，您可以为每个单独的用例创建几个提供者。
+
+> ------
+>
+> > 打开 https://codesandbox.io/embed/provider-pattern-2-4ke0w 查看示例代码
+>
+> ------
+
 
 
 Not ending.
