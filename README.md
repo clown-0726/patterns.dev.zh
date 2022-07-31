@@ -22,7 +22,7 @@ Patterns.dev 是一本关于设计模式和组件模式的免费书籍，用于�
 | 1.2  | [单例模式](./articles/1_2_singleton_pattern.md)<br />*在整个应用程序中共享一个全局实例* | ✅        | ❌        |
 | 1.3  | [代理模式](./articles/1_3_proxy_pattern.md)<br />*目标对象的拦截和控制交互* | ✅        | ❌        |
 | 1.4  | [提供者模式](./articles/1_4_provider_pattern.md)<br />*使数据可用于多个子组件* | ✅        | ❌        |
-| 1.5  | 原型模式                                                     |          |          |
+| 1.5  | [原型模式](./articles/1_5_prototype_pattern.md)<br />*在同类型的多个对象之间共享属性* | ✅        | ❌        |
 | 1.6  | 容器/呈现模式                                                |          |          |
 | 1.7  | 观察者模式                                                   |          |          |
 | 1.8  | 模块模式                                                     |          |          |
